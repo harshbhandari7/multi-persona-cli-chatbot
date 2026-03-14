@@ -2,8 +2,9 @@ from dotenv import load_dotenv
 from google import genai
 import os
 from rich.console import Console
+from openai import OpenAI
 
-from constants import GEMINI_MODEL
+from constants import GEMINI_MODEL, OPENAI_MODEL
 
 load_dotenv()
 
@@ -30,6 +31,8 @@ def convert_messages_to_prompt(messages):
 def call_model(model, messages, temperature):
     if model == "gemini":
         return call_gemini(messages, temperature, model_version=GEMINI_MODEL)
+    elif model == "openai":
+        return call_openai(messages, temperature, model_version=OPENAI_MODEL)
 
     raise ValueError("Unsupported model")
 
@@ -63,6 +66,39 @@ def call_gemini(messages, temperature, model_version="gemini-1.5-flash"):
     except Exception:
         raise Exception("Response generation failed")
 
+    return {
+        "text": full_text,
+        "input_tokens": input_tokens,
+        "thought_tokens": thought_tokens,
+        "output_tokens": output_tokens
+    }
+
+def call_openai(messages, temperature, model_version="gpt-5-mini-2025-08-07"):
+    client = OpenAI()
+
+    full_text = ""
+    input_tokens = 0
+    output_tokens = 0
+    thought_tokens = 0
+
+    try:
+        stream = client.responses.create(
+            model=model_version,
+            input=messages,
+            reasoning={ "effort": "medium" },
+            stream=True
+        )
+        for event in stream:
+            if event.type == "response.output_text.delta":
+                console.print(event.text, end="")
+                full_text += event.delta
+            elif event.type == "response.completed":
+                input_tokens = event.response.usage.input_tokens
+                output_tokens = event.response.usage.output_tokens
+        
+    except Exception:
+        raise Exception("Response generation failed")
+    
     return {
         "text": full_text,
         "input_tokens": input_tokens,

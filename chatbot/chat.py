@@ -21,11 +21,15 @@ def chat_loop(persona, compare, benchmark):
             if user == "/exit":
                 break
         
-
         history.append({"role": "user", "content": user})
          
         console.print("Bot >", style="bold green", end=" ")
-        response = generate_response(user=user, history=history, persona=persona)
+        response = generate_response(
+            user=user, 
+            history=history, 
+            persona=persona,
+            model="openai"
+        )
 
         history.append({"role": "assistant", "content": response["text"]})
 
