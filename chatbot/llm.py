@@ -27,12 +27,10 @@ def generate_response(
     )
     latency = time.monotonic() - start
 
-    input_tokens = 0
-    output_tokens = 0
-
     return {
         "text": result["text"],
-        "input_tokens": input_tokens,
-        "output_tokens": output_tokens,
+        "input_tokens": result["input_tokens"],
+        "thought_tokens": result["thought_tokens"],
+        "output_tokens": result["output_tokens"],
         "latency": latency
     }

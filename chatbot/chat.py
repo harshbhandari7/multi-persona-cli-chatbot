@@ -24,20 +24,19 @@ def chat_loop(persona, compare, benchmark):
 
         history.append({"role": "user", "content": user})
          
+        console.print("Bot >", style="bold green", end=" ")
         response = generate_response(user=user, history=history, persona=persona)
 
         history.append({"role": "assistant", "content": response["text"]})
 
-        print("\n------------------------------\n")
-        console.print("Bot >", style="bold green", end=" ")
-        console.print(response['text'])
-
+        # console.print(response['text'])
+        console.print()
         console.print(
-            f"[dim]tokens: {response["input_tokens"]} -> { response['output_tokens']} \
-            | latency: {response['latency']:.2f}s [/dim]",
+            f"Input tokens: {response["input_tokens"]} | Thought tokens: {response["thought_tokens"]} | Output tokens: { response['output_tokens']} | latency: {response['latency']:.2f}s",
             style="bold red"
         )
-
+        print("\n\n ------------------------------------------------------------------------------------ \n\n")
+        
         log_event({
             "persona": persona,
             "prompt": user,
