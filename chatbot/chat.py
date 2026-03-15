@@ -28,7 +28,7 @@ def chat_loop(persona, compare, benchmark):
             user=user, 
             history=history, 
             persona=persona,
-            model="openai"
+            model="ollama"
         )
 
         history.append({"role": "assistant", "content": response["text"]})

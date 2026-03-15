@@ -3,3 +3,4 @@
 GEMINI_MODEL = "gemini-2.5-flash"
 OPENAI_MODEL = "gpt-5-mini-2025-08-07"
 DEEPSEEK_MODEL = "DeepSeek-V3.2"
+OLLAMA_MODEL = "gpt-oss:120b"

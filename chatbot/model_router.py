@@ -3,8 +3,9 @@ from google import genai
 import os
 from rich.console import Console
 from openai import OpenAI
+from ollama import Client
 
-from constants import GEMINI_MODEL, OPENAI_MODEL, DEEPSEEK_MODEL
+from constants import GEMINI_MODEL, OPENAI_MODEL, DEEPSEEK_MODEL, OLLAMA_MODEL
 
 load_dotenv()
 
@@ -35,6 +36,8 @@ def call_model(model, messages, temperature):
         return call_openai(messages, temperature, model_version=OPENAI_MODEL)
     elif model == "deepseek":
         return call_deepseek(messages, temperature, model_version=DEEPSEEK_MODEL)
+    elif model == "ollama":
+        return call_ollama(messages, temperature, model_version=OLLAMA_MODEL)
 
     raise ValueError("Unsupported model")
 
@@ -108,7 +111,7 @@ def call_openai(messages, temperature, model_version="gpt-5-mini-2025-08-07"):
         "output_tokens": output_tokens
     }
 
-def call_deepseek(messages, temperature, model_version="gpt-5-mini-2025-08-07"):
+def call_deepseek(messages, temperature, model_version="DeepSeek-V3.2"):
     client = OpenAI(
         api_key=os.getenv("DEEPSEEK_API_KEY"),
         base_url="https://api.deepseek.com"
@@ -132,6 +135,41 @@ def call_deepseek(messages, temperature, model_version="gpt-5-mini-2025-08-07"):
 
         input_tokens = stream.response.usage.prompt_tokens
         output_tokens = stream.response.usage.completion_tokens 
+    except Exception:
+        raise Exception("Response generation failed")
+    
+    return {
+        "text": full_text,
+        "input_tokens": input_tokens,
+        "thought_tokens": thought_tokens,
+        "output_tokens": output_tokens
+    }
+
+def call_ollama(messages, temperature, model_version="gpt-oss:120b"):
+    client = Client(
+        host="https://ollama.com",
+        headers={'Authorization': 'Bearer ' + os.environ.get('OLLAMA_API_KEY')}
+    )
+    full_text = ""
+    input_tokens = 0
+    thought_tokens = 0
+    output_tokens = 0
+
+    try:
+        stream = client.chat(
+            model_version, 
+            messages=messages, 
+            stream=True,
+            options={ "temperarure": temperature }
+        )
+        for chunk in stream:
+            if "message" in chunk and "content" in chunk["message"]:
+                content = chunk['message']['content']
+                full_text += content
+                console.print(content, end="")
+            if chunk.get("done"):
+                input_tokens = chunk.get("prompt_eval_count", 0)
+                output_tokens = chunk.get("eval_count", 0)
     except Exception:
         raise Exception("Response generation failed")
     
