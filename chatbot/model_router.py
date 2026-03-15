@@ -4,7 +4,7 @@ import os
 from rich.console import Console
 from openai import OpenAI
 
-from constants import GEMINI_MODEL, OPENAI_MODEL
+from constants import GEMINI_MODEL, OPENAI_MODEL, DEEPSEEK_MODEL
 
 load_dotenv()
 
@@ -33,6 +33,8 @@ def call_model(model, messages, temperature):
         return call_gemini(messages, temperature, model_version=GEMINI_MODEL)
     elif model == "openai":
         return call_openai(messages, temperature, model_version=OPENAI_MODEL)
+    elif model == "deepseek":
+        return call_deepseek(messages, temperature, model_version=DEEPSEEK_MODEL)
 
     raise ValueError("Unsupported model")
 
@@ -96,6 +98,40 @@ def call_openai(messages, temperature, model_version="gpt-5-mini-2025-08-07"):
                 input_tokens = event.response.usage.input_tokens
                 output_tokens = event.response.usage.output_tokens
         
+    except Exception:
+        raise Exception("Response generation failed")
+    
+    return {
+        "text": full_text,
+        "input_tokens": input_tokens,
+        "thought_tokens": thought_tokens,
+        "output_tokens": output_tokens
+    }
+
+def call_deepseek(messages, temperature, model_version="gpt-5-mini-2025-08-07"):
+    client = OpenAI(
+        api_key=os.getenv("DEEPSEEK_API_KEY"),
+        base_url="https://api.deepseek.com"
+    )
+    full_text = ""
+    input_tokens = 0
+    output_tokens = 0
+    thought_tokens = 0
+
+    try:
+        stream = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=messages,
+            stream=True
+        )
+
+        for chunk in stream:
+            delta = chunk.choices[0].delta.content
+            console.print(delta, end="")
+            full_text += delta
+
+        input_tokens = stream.response.usage.prompt_tokens
+        output_tokens = stream.response.usage.completion_tokens 
     except Exception:
         raise Exception("Response generation failed")
     
