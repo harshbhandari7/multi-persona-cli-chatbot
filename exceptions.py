@@ -1,2 +1,2 @@
-class FileNotFoundError(Exception):
+class ConfigNotFoundError(Exception):
     pass

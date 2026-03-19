@@ -6,9 +6,10 @@ from chatbot.model_router import call_model
 def generate_response(
     user,
     persona,
-    history,
+    history=None,
     strategy="zero_shot",
-    model="gemini"
+    model="gemini",
+    silent=False
 ):
     temperature = persona.get("temperature", 0.5)
 
@@ -23,7 +24,8 @@ def generate_response(
     result = call_model(
         model=model,
         messages=messages,
-        temperature=temperature
+        temperature=temperature,
+        silent=silent
     )
     latency = time.monotonic() - start
 

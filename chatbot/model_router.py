@@ -29,19 +29,19 @@ def convert_messages_to_prompt(messages):
 
     return prompt
 
-def call_model(model, messages, temperature):
+def call_model(model, messages, temperature, silent=False):
     if model == "gemini":
-        return call_gemini(messages, temperature, model_version=GEMINI_MODEL)
+        return call_gemini(messages, temperature, model_version=GEMINI_MODEL, silent=silent)
     elif model == "openai":
-        return call_openai(messages, temperature, model_version=OPENAI_MODEL)
+        return call_openai(messages, temperature, model_version=OPENAI_MODEL, silent=silent)
     elif model == "deepseek":
-        return call_deepseek(messages, temperature, model_version=DEEPSEEK_MODEL)
+        return call_deepseek(messages, temperature, model_version=DEEPSEEK_MODEL, silent=silent)
     elif model == "ollama":
-        return call_ollama(messages, temperature, model_version=OLLAMA_MODEL)
+        return call_ollama(messages, temperature, model_version=OLLAMA_MODEL, silent=silent)
 
     raise ValueError("Unsupported model")
 
-def call_gemini(messages, temperature, model_version="gemini-1.5-flash"):
+def call_gemini(messages, temperature, model_version="gemini-1.5-flash", silent=False):
     client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
     prompt = convert_messages_to_prompt(messages)
 
@@ -60,7 +60,8 @@ def call_gemini(messages, temperature, model_version="gemini-1.5-flash"):
         )
         for chunk in stream:
             if chunk.text:
-                console.print(chunk.text, end="")
+                if not silent:
+                    console.print(chunk.text, end="")
                 full_text += chunk.text
             
             if chunk.usage_metadata:
@@ -78,7 +79,7 @@ def call_gemini(messages, temperature, model_version="gemini-1.5-flash"):
         "output_tokens": output_tokens
     }
 
-def call_openai(messages, temperature, model_version="gpt-5-mini-2025-08-07"):
+def call_openai(messages, temperature, model_version="gpt-5-mini-2025-08-07", silent=False):
     client = OpenAI()
 
     full_text = ""
@@ -95,7 +96,8 @@ def call_openai(messages, temperature, model_version="gpt-5-mini-2025-08-07"):
         )
         for event in stream:
             if event.type == "response.output_text.delta":
-                console.print(event.text, end="")
+                if not silent:
+                    console.print(event.delta, end="")
                 full_text += event.delta
             elif event.type == "response.completed":
                 input_tokens = event.response.usage.input_tokens
@@ -111,7 +113,7 @@ def call_openai(messages, temperature, model_version="gpt-5-mini-2025-08-07"):
         "output_tokens": output_tokens
     }
 
-def call_deepseek(messages, temperature, model_version="DeepSeek-V3.2"):
+def call_deepseek(messages, temperature, model_version="DeepSeek-V3.2", silent=False):
     client = OpenAI(
         api_key=os.getenv("DEEPSEEK_API_KEY"),
         base_url="https://api.deepseek.com"
@@ -130,7 +132,8 @@ def call_deepseek(messages, temperature, model_version="DeepSeek-V3.2"):
 
         for chunk in stream:
             delta = chunk.choices[0].delta.content
-            console.print(delta, end="")
+            if not silent:
+                console.print(delta, end="")
             full_text += delta
 
         input_tokens = stream.response.usage.prompt_tokens
@@ -145,7 +148,7 @@ def call_deepseek(messages, temperature, model_version="DeepSeek-V3.2"):
         "output_tokens": output_tokens
     }
 
-def call_ollama(messages, temperature, model_version="gpt-oss:120b"):
+def call_ollama(messages, temperature, model_version="gpt-oss:120b", silent=False):
     client = Client(
         host="https://ollama.com",
         headers={'Authorization': 'Bearer ' + os.environ.get('OLLAMA_API_KEY')}
@@ -157,16 +160,17 @@ def call_ollama(messages, temperature, model_version="gpt-oss:120b"):
 
     try:
         stream = client.chat(
-            model_version, 
-            messages=messages, 
+            model_version,
+            messages=messages,
             stream=True,
-            options={ "temperarure": temperature }
+            options={ "temperature": temperature }
         )
         for chunk in stream:
             if "message" in chunk and "content" in chunk["message"]:
                 content = chunk['message']['content']
                 full_text += content
-                console.print(content, end="")
+                if not silent:
+                    console.print(content, end="")
             if chunk.get("done"):
                 input_tokens = chunk.get("prompt_eval_count", 0)
                 output_tokens = chunk.get("eval_count", 0)

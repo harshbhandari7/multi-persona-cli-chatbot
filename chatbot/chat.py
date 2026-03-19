@@ -1,11 +1,15 @@
 from rich.console import Console
+
 from chatbot.llm import generate_response
 from logger import log_event
-
+from constants import MODEL_VERSION
 
 console = Console()
 
-def chat_loop(persona, compare, benchmark):
+def get_loader_msg(persona_name, model):
+    return f"[bold cyan]Generating response... Persona: [yellow]{persona_name}[/yellow] Model: [yellow]{MODEL_VERSION[model].value}[/yellow] [/bold cyan]"
+
+def chat_loop(persona, persona_name, compare, benchmark, model):
     console.print("Chatbot ready. Type '/exit' to quit.")
 
     history = []
@@ -24,11 +28,12 @@ def chat_loop(persona, compare, benchmark):
         history.append({"role": "user", "content": user})
          
         console.print("Bot >", style="bold green", end=" ")
+        console.print(get_loader_msg(persona_name, model))
         response = generate_response(
-            user=user, 
-            history=history, 
+            user=user,
+            history=history,
             persona=persona,
-            model="ollama"
+            model=model,
         )
 
         history.append({"role": "assistant", "content": response["text"]})
@@ -46,8 +51,3 @@ def chat_loop(persona, compare, benchmark):
             "prompt": user,
             "response": response
         })
-
-
-
-
-

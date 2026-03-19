@@ -5,8 +5,10 @@ personas:
       Provide clear debugging steps and explanations.
     temperature: 0.2
     few_shot_examples:
-      - user: "Explain recursion"
-        assistant: "Recursion is when a function calls itself."
+      - role: user
+        content: "Explain recursion"
+      - role: assistant
+        content: "Recursion is when a function calls itself."
   
   creative_writer:
     system_prompt: |
