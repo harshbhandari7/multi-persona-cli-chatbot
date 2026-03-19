@@ -102,9 +102,8 @@ def call_openai(messages, temperature, model_version="gpt-5-mini-2025-08-07", si
             elif event.type == "response.completed":
                 input_tokens = event.response.usage.input_tokens
                 output_tokens = event.response.usage.output_tokens
-        
-    except Exception:
-        raise Exception("Response generation failed")
+    except Exception as e:
+        raise Exception("Response generation failed", e)
     
     return {
         "text": full_text,
@@ -125,7 +124,7 @@ def call_deepseek(messages, temperature, model_version="DeepSeek-V3.2", silent=F
 
     try:
         stream = client.chat.completions.create(
-            model="deepseek-chat",
+            model=model_version,
             messages=messages,
             stream=True
         )

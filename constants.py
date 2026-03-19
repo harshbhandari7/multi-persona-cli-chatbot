@@ -20,3 +20,10 @@ class MODEL_VERSION(Enum):
     openai=OPENAI_MODEL
     deepseek=DEEPSEEK_MODEL
     ollama=OLLAMA_MODEL
+
+TOKEN_PRICING = {
+    "gemini":   (0.30,  2.50),
+    "openai":   (0.25,  2.00),
+    "deepseek": (0.28,  0.42),
+    "ollama":   (0.039, 0.19),
+}

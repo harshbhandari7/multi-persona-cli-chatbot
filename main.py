@@ -5,6 +5,7 @@ from chatbot.chat import chat_loop
 from config.loader import load_personas
 from chatbot.compare import compare_loop
 from constants import PERSONA_NAME
+from chatbot.benchmark import benchmark_loop
 
 console = Console()
 
@@ -26,6 +27,12 @@ def main():
 
     if args.compare:
         compare_loop(
+            persona=personas[args.persona],
+            persona_name=PERSONA_NAME[args.persona].value,
+            model=args.model
+        )
+    elif args.benchmark:
+        benchmark_loop(
             persona=personas[args.persona],
             persona_name=PERSONA_NAME[args.persona].value,
             model=args.model
