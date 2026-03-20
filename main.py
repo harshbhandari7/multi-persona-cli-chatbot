@@ -25,6 +25,15 @@ def main():
         console.print("-", p)
     print('\n')
 
+    valid_personas = list(personas.keys())
+    if args.persona not in personas or args.persona not in PERSONA_NAME.__members__:
+        console.print(
+            f"[bold red]Error:[/bold red] Unknown persona '[yellow]{args.persona}[/yellow]'. "
+            f"Valid options: {', '.join(valid_personas)}",
+            style="red"
+        )
+        return
+
     if args.compare:
         compare_loop(
             persona=personas[args.persona],

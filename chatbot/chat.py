@@ -24,9 +24,7 @@ def chat_loop(persona, persona_name, compare, benchmark, model):
                 continue
             if user == "/exit":
                 break
-        
-        history.append({"role": "user", "content": user})
-         
+
         console.print("Bot >", style="bold green", end=" ")
         console.print(get_loader_msg(persona_name, model))
         response = generate_response(
@@ -36,10 +34,10 @@ def chat_loop(persona, persona_name, compare, benchmark, model):
             model=model,
         )
 
+        history.append({"role": "user", "content": user})
         history.append({"role": "assistant", "content": response["text"]})
 
         # console.print(response['text'])
-        console.print()
         console.print(
             f"Input tokens: {response["input_tokens"]} | Thought tokens: {response["thought_tokens"]} | Output tokens: { response['output_tokens']} | latency: {response['latency']:.2f}s",
             style="bold red"

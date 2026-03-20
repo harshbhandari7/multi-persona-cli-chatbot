@@ -25,7 +25,7 @@ def build_few_shot(system_prompt, user_prompt, persona, history=None):
     messages.append({ "role": "user", "content": user_prompt })
     return messages
 
-def build_chain_of_thought(system_prompt, user_prompt, history):
+def build_chain_of_thought(system_prompt, user_prompt, history=None):
     messages = [
         { "role": "system", "content": system_prompt }
     ]
